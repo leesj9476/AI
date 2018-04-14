@@ -34,12 +34,6 @@ typedef struct Node {
 	Node *parent;
 } Node;
 
-// compare score -> smaller length, bigger score
-bool operator< (const Node *n1, const Node *n2) {
-	return n1->length_from_start + n1->length_to_goal > n2->length_from_start + n2->length_to_goal;
-}
-
-// result info -> length, time
 typedef struct Result {
 	Result();
 	Result(int, int);
@@ -93,6 +87,14 @@ Node::Node(int row_, int col_, Node *parent_, int length_from_start_, int length
 		parent = parent_;
 }
 
+// compare score -> smaller length, bigger score
+struct Compare {
+	bool operator() (const Node *n1, const Node *n2) {
+		return n1->length_from_start + n1->length_to_goal > n2->length_from_start + n2->length_to_goal;
+	}
+};
+
+// result info -> length, time
 Result::Result()
 	: length(0), time(0) {}
 
@@ -277,7 +279,7 @@ Result calc(Map **map, int row, int col, Point &start, vector<Point> &goal) {
 		search_map[goal[i].row][goal[i].col] = CheckMap::GOAL;
 
 	// search biggest score point first
-	priority_queue<Node *, vector<Node *> > search_queue;
+	priority_queue<Node *, vector<Node *>, Compare> search_queue;
 	search_queue.push(&root);
 	Node *goal_node = NULL;
 
@@ -291,8 +293,6 @@ Result calc(Map **map, int row, int col, Point &start, vector<Point> &goal) {
 		res.time++;
 
 		Point cur_p(cur_node->p.row, cur_node->p.col);
-
-		cout << cur_p.row << " " << cur_p.col << " " << cur_node->length_from_start + cur_node->length_to_goal << endl;
 
 		// check if goal node
 		if (map[cur_p.row][cur_p.col] == Map::GOAL) {

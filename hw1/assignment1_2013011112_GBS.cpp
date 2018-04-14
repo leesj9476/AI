@@ -25,7 +25,6 @@ typedef struct Point {
 // node info -> point info, length to goal, child and parent node
 typedef struct Node {
 	Node(int, int, Node * = NULL, int = 0);
-	bool operator<(const Node *);
 
 	Point p;
 	int length;
@@ -33,11 +32,6 @@ typedef struct Node {
 	vector<Node *> child;
 	Node *parent;
 } Node;
-
-// compare score -> smaller length, bigger score
-bool Node::operator<(const Node *n) {
-	return this->length > n->length;
-}
 
 // result info -> length, time
 typedef struct Result {
@@ -91,6 +85,13 @@ Node::Node(int row_, int col_, Node *parent_, int length_) {
 	else
 		parent = parent_;
 }
+
+// compare score -> smaller length, bigger score
+struct Compare {
+	bool operator() (const Node *n1, const Node *n2) {
+		return n1->length > n2->length;
+	}
+};
 
 Result::Result()
 	: length(0), time(0) {}
@@ -276,7 +277,7 @@ Result calc(Map **map, int row, int col, Point &start, vector<Point> &goal) {
 		search_map[goal[i].row][goal[i].col] = CheckMap::GOAL;
 
 	// search biggest score point first
-	priority_queue<Node *> search_queue;
+	priority_queue<Node *, vector<Node *>, Compare> search_queue;
 	search_queue.push(&root);
 	Node *goal_node = NULL;
 
