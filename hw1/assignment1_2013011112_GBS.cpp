@@ -118,6 +118,7 @@ int MAP_SIZE_COL = 0;
 
 Result calc(Map **, int, int, Point &, vector<Point> &);
 bool makeReductionMapTree(Node &, Map **, int, int, Point &);
+int possibleRoad(Map **, CheckMap **, Node *, Direction &);
 
 int main () {
 	string input_filename = "input.txt";
@@ -275,14 +276,44 @@ bool makeReductionMapTree(Node &root, Map **map, int row, int col, Point &start)
 	queue<Node *> cross_roads;
 	cross_roads.push(&root);
 
+	CheckMap **search_map;
+	search_map = new CheckMap *[row];
+	for (int i = 0; i < row; i++) {
+		search_map[i] = new CheckMap[col];
+		
+		for (int j = 0; j < col; j++)
+			search_map[i][j] = CheckMap::UNCHECKED;
+	}
+
 	while (!cross_roads.empty()) {
 		Node *cur_node = cross_roads.front();
 		cross_roads.pop();
 
-		// go 1-line way -> length++
-		
+		while (true) {
+			Direction dir;
+			int p = possibleRoad(map, search_map, cur_node, dir);
 
+			if (p == 0) {
+				// no way or goal point
+			}
+			else if (p == 1) {
+				// 1 way
+			}
+			else {
+				// 2 or more way -> push to cur_node's vector and search queue				
+			}
+		}
+	}
+}
 
-		// if find cross road, push that point to queue
+int possibleRoad(Map **map, CheckMap **search_map, Node *node, Direction &dir) {
+	int row = node->p.row;
+	int col = node->p.col;
+
+	// UP
+	if (row > 0) {
+		if (map[row-1][col] == Map::GOAL) {
+		}
+		else if (map[row-1][col] == Map::ROAD && search_map[row-1][col] == CheckMap::UNCHECKED
 	}
 }
