@@ -217,7 +217,7 @@ int main () {
 
 	output_f << "---" << endl;
 	// best result
-	if (result.length != -1 || result.time != -1) {
+	if (result.length != -1) {
 		output_f << "length=" << result.length << endl;
 		output_f << "time=" << result.time << endl;
 	}
