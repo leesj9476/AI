@@ -25,7 +25,7 @@ typedef struct Point {
 // node info -> point info, length to goal, child and parent node
 typedef struct Node {
 	Node(int, int, Node * = NULL, int = 0);
-	bool operator<(const Node &);
+	bool operator<(const Node *);
 
 	Point p;
 	int length;
@@ -33,6 +33,11 @@ typedef struct Node {
 	vector<Node *> child;
 	Node *parent;
 } Node;
+
+// compare score -> smaller length, bigger score
+bool Node::operator<(const Node *n) {
+	return this->length > n->length;
+}
 
 // result info -> length, time
 typedef struct Result {
@@ -85,11 +90,6 @@ Node::Node(int row_, int col_, Node *parent_, int length_) {
 		parent = this;
 	else
 		parent = parent_;
-}
-
-// compare score -> smaller length, bigger score
-bool Node::operator<(const Node &n) {
-	return -(this->length) < -n.length;
 }
 
 Result::Result()
@@ -149,7 +149,7 @@ int main () {
 	// allocate map array data
 	Map **map_info = NULL;
 	map_info = new Map *[row];
-	for (int i = 0; i < col; i++)
+	for (int i = 0; i < row; i++)
 		map_info[i] = new Map[col];
 
 	int map_1cell_data = 0;

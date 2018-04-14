@@ -22,17 +22,22 @@ typedef struct Point {
 	int col;
 } Point;
 
-// node info -> point info, length to goal, child and parent node
+// node info -> point info, length data, child and parent node
 typedef struct Node {
-	Node(int, int, Node * = NULL, int = 0);
-	bool operator<(const Node &);
+	Node(int, int, Node * = NULL, int = 0, int = 0);
 
 	Point p;
-	int length;
+	int length_from_start;
+	int length_to_goal;
 
 	vector<Node *> child;
 	Node *parent;
 } Node;
+
+// compare score -> smaller length, bigger score
+bool operator< (const Node *n1, const Node *n2) {
+	return n1->length_from_start + n1->length_to_goal > n2->length_from_start + n2->length_to_goal;
+}
 
 // result info -> length, time
 typedef struct Result {
@@ -75,21 +80,17 @@ bool Point::operator!=(const Point &p) {
 	return (this->row != p.row || this->col != p.col);
 }
 
-Node::Node(int row_, int col_, Node *parent_, int length_) {
+Node::Node(int row_, int col_, Node *parent_, int length_from_start_, int length_to_goal_) {
 	p.row = row_;
 	p.col = col_;
-	length = length_;
+	length_from_start = length_from_start_;
+	length_to_goal = length_to_goal_;
 
 	// for root node
 	if (parent_ == NULL)
 		parent = this;
 	else
 		parent = parent_;
-}
-
-// compare score -> smaller length, bigger score
-bool Node::operator<(const Node &n) {
-	return -(this->length) < -n.length;
 }
 
 Result::Result()
@@ -149,7 +150,7 @@ int main () {
 	// allocate map array data
 	Map **map_info = NULL;
 	map_info = new Map *[row];
-	for (int i = 0; i < col; i++)
+	for (int i = 0; i < row; i++)
 		map_info[i] = new Map[col];
 
 	int map_1cell_data = 0;
@@ -276,7 +277,7 @@ Result calc(Map **map, int row, int col, Point &start, vector<Point> &goal) {
 		search_map[goal[i].row][goal[i].col] = CheckMap::GOAL;
 
 	// search biggest score point first
-	priority_queue<Node *> search_queue;
+	priority_queue<Node *, vector<Node *> > search_queue;
 	search_queue.push(&root);
 	Node *goal_node = NULL;
 
@@ -291,6 +292,8 @@ Result calc(Map **map, int row, int col, Point &start, vector<Point> &goal) {
 
 		Point cur_p(cur_node->p.row, cur_node->p.col);
 
+		cout << cur_p.row << " " << cur_p.col << " " << cur_node->length_from_start + cur_node->length_to_goal << endl;
+
 		// check if goal node
 		if (map[cur_p.row][cur_p.col] == Map::GOAL) {
 			goal_node = cur_node;
@@ -304,28 +307,32 @@ Result calc(Map **map, int row, int col, Point &start, vector<Point> &goal) {
 		// UP
 		if (move_flag & 0x01) {
 			Node *up_node = new Node(cur_p.row-1, cur_p.col, cur_node);
-			up_node->length = shortestLength(cur_p.row-1, cur_p.col, goal);
+			up_node->length_from_start = up_node->parent->length_from_start + 1;
+			up_node->length_to_goal = shortestLength(cur_p.row-1, cur_p.col, goal);
 			search_queue.push(up_node);
 		}
 
 		// RIGHT
 		if (move_flag & 0x02) {
 			Node *right_node = new Node(cur_p.row, cur_p.col+1, cur_node);
-			right_node->length = shortestLength(cur_p.row, cur_p.col+1, goal);
+			right_node->length_from_start = right_node->parent->length_from_start + 1;
+			right_node->length_to_goal = shortestLength(cur_p.row, cur_p.col+1, goal);
 			search_queue.push(right_node);
 		}
 
 		// DOWN
 		if (move_flag & 0x04) {
 			Node *down_node = new Node(cur_p.row+1, cur_p.col, cur_node);
-			down_node->length = shortestLength(cur_p.row+1, cur_p.col, goal);
+			down_node->length_from_start = down_node->parent->length_from_start + 1;
+			down_node->length_to_goal = shortestLength(cur_p.row+1, cur_p.col, goal);
 			search_queue.push(down_node);
 		}
 
 		// LEFT
 		if (move_flag & 0x08) {
 			Node *left_node = new Node(cur_p.row, cur_p.col-1, cur_node);
-			left_node->length = shortestLength(cur_p.row, cur_p.col-1, goal);
+			left_node->length_from_start = left_node->parent->length_from_start + 1;
+			left_node->length_to_goal = shortestLength(cur_p.row, cur_p.col-1, goal);
 			search_queue.push(left_node);
 		}
 	}

@@ -133,7 +133,7 @@ int main () {
 	// allocate map array data
 	Map **map_info = NULL;
 	map_info = new Map *[row];
-	for (int i = 0; i < col; i++)
+	for (int i = 0; i < row; i++)
 		map_info[i] = new Map[col];
 
 	int map_1cell_data = 0;
